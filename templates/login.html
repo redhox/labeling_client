@@ -1,0 +1,60 @@
+<head>
+  <meta charset="UTF-8" />
+  <title>image-label - Login</title>
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='/css/login.css') }}"
+  />
+</head>
+
+<body id="particles-js"></body>
+<div class="animated bounceInDown">
+  <div class="container">
+    <span class="error animated tada" id="msg"></span>
+    <form name="form1" class="box" action="/" method="post">
+      <h4>image-label</h4>
+      <h5>Sign in to your account.</h5>
+      <input
+        type="text"
+        name="email"
+        placeholder="email"
+        autocomplete="off"
+      />
+      <input
+        type="password"
+        name="password"
+        placeholder="Passsword"
+        id="pwd"
+        autocomplete="off"
+      />
+      <input type="submit" value="Sign in" class="btn1" />
+    </form>
+    <a class="register">No account ? Ask an admin</a>
+  </div>
+</div>
+
+<script>
+  function checkStuff() {
+    var username = document.form1.username;
+    var password = document.form1.password;
+    var msg = document.getElementById("msg");
+
+    if (username.value == "") {
+      msg.style.display = "block";
+      msg.innerHTML = "Please enter your username";
+      username.focus();
+      return false;
+    } else {
+      msg.innerHTML = "";
+    }
+
+    if (password.value == "") {
+      msg.style.display = "block";
+      msg.innerHTML = "Please enter your password";
+      password.focus();
+      return false;
+    } else {
+      msg.innerHTML = "";
+    }
+  }
+</script>

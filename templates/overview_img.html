@@ -1,0 +1,34 @@
+<head>
+    <meta charset="UTF-8" />
+    <title>Intradys - Overview</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='/css/overview.css') }}"
+    />
+  </head>
+  <!-- Script JavaScript pour la fonction de recherche -->
+  
+  {% extends 'container.html' %} {% block content %}{% include 'menu.html' %}
+  <div class="content">
+    <div class="header_wrap" style="width: 100%;height: 70vh;overflow: scroll;">
+      <table class="table table-striped table-class" id="table-id">
+        
+        <tbody>
+          {% for image in images %}
+          {% set image_url = path ~ '/' ~ image[0] %}
+          <tr>
+            <td><a href="{{ url_for('labelling',pathname=path,dirname=dirname, filename=image[0]) }}">
+                <img src=" {{ url_for('get_image',pathname=path,dirname=dirname, filename=image[0]) }}"></img>{{ path }} plus {{image[0]}}</a>
+            </td>
+            <td>{{image[1]}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  {{images}}
+      <!-- Liens de pagination -->
+
+
+    {% endblock %}
+  </div>
+  

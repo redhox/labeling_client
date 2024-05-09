@@ -1,0 +1,81 @@
+<head>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/css-pro-layout@1.1.0/dist/css/css-pro-layout.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
+  />
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='/css/sidebar.css') }}"
+  />
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='/css/icons.css') }}"
+  />
+  <div class="layout has-sidebar fixed-sidebar fixed-header sidebar">
+    <aside id="sidebar" class="sidebar break-point-sm has-bg-image">
+      <a id="btn-collapse" class="sidebar-collapser"
+        ><i class="ri-arrow-left-s-line"></i
+      ></a>
+      <div class="image-wrapper">
+      </div>
+      <div class="sidebar-layout">
+        <div class="sidebar-header">
+          <div class="pro-sidebar-logo">
+            
+            <h5>image-label</h5>
+            <div class="user_info">
+              <p class="">{{user}}</p>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-content">
+          <nav class="menu">
+            <ul>
+              <li class="menu-header"><span> GENERAL </span></li>
+              <li class="menu-item">
+                <a href="{{ url_for('dashboard') }}">
+                  <span class="menu-icon">
+                    <i class="gg-home"></i>
+                  </span>
+                  <span class="menu-title">Home</span>
+                </a>
+              </li>
+              <li class="menu-item">
+                <a href="{{ url_for('overview') }}">
+                  <span class="menu-icon">
+                    <i class="gg-browse"></i>
+                  </span>
+                  <span class="menu-title">Overview</span>
+                </a>
+              </li>
+              
+              <li class="menu-header" style="padding-top: 20px">
+                <span> EXTRA </span>
+              </li>
+              <li class="menu-item"></li>
+              
+              <li class="menu-item">
+                <a href="{{ url_for('logout') }}">
+                  <span class="menu-icon">
+                    <i class="gg-log-out"></i>
+                  </span>
+                  <span class="menu-title">Logout</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>

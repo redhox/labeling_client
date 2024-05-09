@@ -1,0 +1,54 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Intradys - Help</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='/css/help.css') }}"
+    />
+  </head>
+  <body>
+    {% extends 'container.html' %} {% block content %}{% include 'menu.html' %}
+    <div class="content">
+      <form name="help_form" class="box" method="post">
+        <h1>Report a problem</h1>
+        <div class="form_div">
+          <label for="form_div_select" class="form_div_label"
+            >Problem type<span style="color: red; font-weight: bold">
+              *</span
+            ></label
+          >
+          <select name="form_div_select1" class="form_div_select">
+            <option value="test">page</option>
+            <option value="test">Overview page</option>
+          </select>
+        </div>
+        <div class="form_div">
+          <label for="form_div_textarea" class="form_div_label"
+            >Comment<span style="color: red; font-weight: bold"> *</span></label
+          >
+          <textarea
+            name="form_div_textarea"
+            class="form_div_textarea"
+          ></textarea>
+        </div>
+        <div class="form_div">
+          <label for="form_div_select2" class="form_div_label"
+            >Importance<span style="color: red; font-weight: bold">
+              *</span
+            ></label
+          >
+          <select name="form_div_select2" class="form_div_select">
+            <option value="test">High</option>
+            <option value="test">Low</option>
+          </select>
+        </div>
+        <div class="btn_container">
+          <input type="submit" value="Cancel" class="btn_cancel" />
+          <input type="submit" value="Send" class="btn_send" />
+        </div>
+      </form>
+    </div>
+    {% endblock %}
+  </body>
+</html>
