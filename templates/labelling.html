@@ -11258,10 +11258,31 @@ function import_json(jsonData) {
 }
 
 // Example usage with a JSON object
-var json = {
+let json = {
       "{{ url_for('get_image',pathname=filepath[0],dirname=filepath[1], filename=filepath[2]) }}": {
-        "filename": "{{ url_for('get_image',pathname=filepath[0],dirname=filepath[1], filename=filepath[2]) }}",}
+        "filename": "{{ url_for('get_image',pathname=filepath[0],dirname=filepath[1], filename=filepath[2]) }}",
+              "regions": [
+          {% for region in regions %}
+            {
+              "shape_attributes": {
+                "name": "{{ region['shape_attributes']['name'] }}",
+                "x": {{ region['shape_attributes']['x'] }},
+                "y": {{ region['shape_attributes']['y'] }},
+                "width": {{ region['shape_attributes']['width'] }},
+                "height": {{ region['shape_attributes']['height'] }}
+              },
+              
+            },
+          {% endfor %}
+          ],
+          
+          
+        },
+
   };
+
+
+
 
 
 import_json(json)

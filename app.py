@@ -14,6 +14,8 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 import uuid
+from bson import json_util
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECTRET_KEY')
 SERVER_URL = os.environ.get("SERVER_URL")
@@ -27,7 +29,7 @@ if os.getenv('UUID_MACHINE') == None:
 
 UUID_MACHINE=os.getenv('UUID_MACHINE')
 def get_token(email, password):
-    url = 'http://192.168.173.12:8002/users/token'
+    url = 'http://192.168.132.12:8002/users/token'
     data = {'email': email, 'password': password}
     headers = {'Content-Type': 'application/json'}
     try:
@@ -106,7 +108,7 @@ def images_in_dir(path):
 @app.route('/', methods=['GET', 'POST'])
 def login():
     print("bonjour")
-    if request.method == 'POST':
+    if request.method == 'POST': 
         print("post")
         email = request.form['email']
         password = request.form['password']
@@ -144,19 +146,38 @@ def labelling(pathname,dirname,filename):
 
         filepath=[pathname,dirname,filename]
         print(f'/{filepath[0]}/{filepath[1]}/{filepath[2]}')
-        # filepath = '/image_dir/image/boys.jpg'
         with open(f'/{filepath[0]}/{filepath[1]}/{filepath[2]}', "rb") as img_file:
             files = {'file': img_file}
         
-            data={'path': f'{filepath[1]}/{filepath[2]}'}
+            data={'path': f'{filepath[1]}/{filepath[2]}'} 
             
+            #verification 
             response = requests.post(
-                f"{SERVER_URL}/images/image_save",
-                data={"path": f'{UUID_MACHINE}/{filepath[1]}/{filepath[2]}'},
-                files=files
+                f"{SERVER_URL}/images/image_search", 
+                data={"path": f'{UUID_MACHINE}/{filepath[1]}/{filepath[2]}'}, 
                 )
-        
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                data = json.loads(response_data)
+                regions = data['regions'] 
+                
+            else:
+                # envoi de limage
+                response = requests.post(
+                    f"{SERVER_URL}/images/image_save",
+                    data={"path": f'{UUID_MACHINE}/{filepath[1]}/{filepath[2]}'},
+                    files=files
+                    )
+                response_data = response.json()
+                regions = json.dumps(response_data)
+                # Load the JSON data
+                data_dict = json.loads(regions)
 
+                # Extract the information
+                regions = data_dict["regions"]
+            print('region=', regions )
+            # regions=response_data
         # response = requests.post(f"{SERVER_URL}/images/image_save",json={'path':f'{filepath[1]}/{filepath[2]}'},files=files)
 
         # filepath = {"filepath": filepath}
@@ -192,12 +213,14 @@ def labelling(pathname,dirname,filename):
         # filename = filename_2
         # response_image = requests.post(
         #     f'{SERVER_URL}/image_from_server', json=filepath, headers=headers)
-
-        # with open(f"./image/{filename}", 'wb') as f:
+        # with open(f"./image/{filename}", 'wb') as f: 
         #     f.write(response_image.content)
+        # regions=json_util.dumps(regions[0])
+        
         image = filename
         liste_images=images_in_dir(f'/{filepath[0]}/{filepath[1]}')
-        return render_template('labelling.html',  filepath=filepath,liste_images=liste_images, filesize=440 )
+        print('liste region',regions)
+        return render_template('labelling.html', regions=regions, filepath=filepath,liste_images=liste_images, filesize=440 )
         return render_template('labelling.html', image=image, filename=filename, data=data, id_image=id_image, filesize=filesize)
     else:
         print("Authentication failed")
