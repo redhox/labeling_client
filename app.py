@@ -178,50 +178,11 @@ def labelling(pathname,dirname,filename):
                 regions = data_dict["regions"]
             print('region=', regions )
             # regions=response_data
-        # response = requests.post(f"{SERVER_URL}/images/image_save",json={'path':f'{filepath[1]}/{filepath[2]}'},files=files)
-
-        # filepath = {"filepath": filepath}
-        # filename_2 = data_image['result']['name']
-        ##labelisation time
-        
-        # if data_image['result']['labels'] == False:
-        #     response_annotation = requests.post(
-        #         f'{SERVER_URL}/load_images', json=filepath, headers=headers)
-        #     data = response_annotation.json()
-        #     print(data)
-        # else:
-        #     data = data_image['result']['regions']
-        #     data = {'images': {
-        #             f"{filename_2}{data_image['result']['size']}": {
-        #                 'file_attributes': {},
-        #                 'filename': data_image['result']['name'],
-        #                 'regions': data,
-        #                 'size': data_image['result']['size']
-        #             }
-        #             }}
-
-
-        # filename = [image_info['filename']
-        #             for image_info in data['images'].values()]
-        # filesize = [image_info['size']
-        #             for image_info in data['images'].values()]
-        # filename = filename[0]
-        # filesize = filesize[0]
-        # print(filesize)
-        # print(f"Image:{filename}")
-        # print(f"Image:{filename_2}")
-        # filename = filename_2
-        # response_image = requests.post(
-        #     f'{SERVER_URL}/image_from_server', json=filepath, headers=headers)
-        # with open(f"./image/{filename}", 'wb') as f: 
-        #     f.write(response_image.content)
-        # regions=json_util.dumps(regions[0])
         
         image = filename
         liste_images=images_in_dir(f'/{filepath[0]}/{filepath[1]}')
         print('liste region',regions)
         return render_template('labelling.html', regions=regions, filepath=filepath,liste_images=liste_images, filesize=440 )
-        return render_template('labelling.html', image=image, filename=filename, data=data, id_image=id_image, filesize=filesize)
     else:
         print("Authentication failed")
         return jsonify({'message': 'Authentication failed'}), 401
