@@ -1,0 +1,19 @@
+<header style="width: 100%; background-color: bisque; overflow: auto; ">
+<div style="float: left; /* Aligne l'élément à gauche */">
+    <a href="{{ url_for('dashboard') }}">dashboard</a>
+    <a href="{{ url_for('overview') }}">overview</a>
+    {% if user['is_admin'] == True %}
+    <a href="{{ url_for('model_list') }}"><span class="menu-title">Model</span></a>
+    {% endif %}
+</div>
+
+<div style="float: right;">
+    {{user['username']}}
+    {{user['mail']}}
+    {% if user['is_admin'] == True %}
+        role: admin
+    {% endif %}
+
+ lougout 
+</div>
+</header>

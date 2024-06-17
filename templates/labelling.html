@@ -188,7 +188,7 @@ button.leftsidebar_accordion.active:after { content: '\2796'; }
 
 /* Attribute editor */
 #annotation_editor_panel { position:fixed; display:none; width:100%; left:0; bottom:0; background-color:white; border-top:2px solid #cccccc; padding:0.2em 1em; overflow:auto; z-index:1001; box-shadow: 0 0 1em #cccccc;}
-#annotation_editor { display:table; margin-bottom:3em; border-collapse:collapse; font-size:inherit; position: absolute; background-color:white; }
+#annotation_editor { display:table; margin-bottom:3em; border-collapse:collapse; font-size:inherit; width: 100%; background-color:white; }
 #annotation_editor .row { display:table-row; }
 #annotation_editor .highlight .col { background-color:#e6e6e6;}
 
@@ -277,7 +277,29 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
   </head>
 
   <body onload="_via_init()" onresize="_via_update_ui_components()">
-    <!--
+    {% include 'navtop.html'%}
+    
+    <div  id="page_model" style="z-index: 99; display: none; position: absolute; height: 100vh; width: 100%;align-items: center; justify-content: center;">
+      <div   style=" display: flex; flex-direction: column; 20px; width: 80%;height: 60%; background-color: red;">
+        <div style="height: 80%;overflow: scroll;">
+          {% for model in liste_models %}
+          <div onclick="load_model('{{model.run_id}}')" style="border:solid 3px #000000;"> <h3>{{model.run_name}}</h3> <p>{{model.run_id}} ,{{model.path}}</p> <code>{{model.metrics}}</code> </div>
+          {% endfor %}
+            
+        </div>
+        <div>
+          <p onclick="volet_code('close')" style="position:relative;right: 0px;top: 0px;">apliqué</p>
+          <p onclick="volet_code('close')" style="position:relative;right: 0px;top: 0px;">fermé</p>
+        </div>
+        
+
+      </div>
+    </div>
+    
+    
+    
+    
+      <!--
         SVG icon set definitions
         Material icons downloaded from https://material.io/icons
       -->
@@ -406,7 +428,7 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
     </div>
 
     <!-- spreadsheet like editor for annotations -->
-    <div id="annotation_editor_panel">
+    <div id="annotation_editor_panel" style="display: none;">
       <div class="button_panel">
         <span class="text_button" onclick="edit_region_metadata_in_annotation_editor()" id="button_edit_region_metadata" title="Manual annotations of regions">Region Annotations</span>
         <span class="text_button" onclick="edit_file_metadata_in_annotation_editor()" id="button_edit_file_metadata" title="Manual annotations of a file">File Annotations</span>
@@ -520,9 +542,26 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
       <!-- end of shortcut toolbar -->
       <input type="file" id="invisible_file_input" name="files[]" style="display:none">
     </div> <!-- endof #top_panel -->
+    
+    <div  onclick="volet_code('open')">model : {{model}} : {{label_confirm}}</div>
+
+   
+    
+    <div style="display: flex;flex-direction: row;">
     {% for element in liste_images %}
-    <a href="{{ url_for('labelling',pathname=filepath[0],dirname=filepath[1], filename=element[0]) }}">   {{element[0]}}</a>
+   
+    <a href="{{ url_for('labelling',pathname=filepath[0],dirname=filepath[1], filename=element,model=model) }}">
+      <img src=" {{ url_for('get_image_thumbnail',pathname=filepath[0],dirname=filepath[1], filename=element) }}"></img>
+      
+    </a>
+ 
     {% endfor %}
+  </div>
+
+
+<button onclick="upload_all_region_data()">save</button>
+<button onclick="save_and_next()">save and next</button>
+  {{index_in_list}}
     <!-- Middle Panel contains a left-sidebar and image display areas -->
     <div class="middle_panel">
       <!-- this panel contains a button to shows the left side bar -->
@@ -537,8 +576,8 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
           <span class="text_button" onclick="leftsidebar_toggle()" title="Show/hide this toolbar panel">&ltrif;</span>
         </div>
 
-        <button class="leftsidebar_accordion active">Region Shape</button>
-        <div class="leftsidebar_accordion_panel show">
+        <button style="display: none;" class="leftsidebar_accordion active">Region Shape</button> 
+        <div style="display: none;" class="leftsidebar_accordion_panel show">
           <ul class="region_shape">
             <li id="region_shape_rect" class="selected" onclick="select_region_shape('rect')" title="Rectangle (Shortcut key 1)"><svg height="32" viewbox="0 0 32 32"><use xlink:href="#shape_rectangle"></use></svg></li>
             <li id="region_shape_circle" onclick="select_region_shape('circle')" title="Circle (Shortcut key 2)"><svg height="32" viewbox="0 0 32 32"><use xlink:href="#shape_circle"></use></svg></li>
@@ -551,8 +590,8 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
         </div>
 
         <!-- Project -->
-        <button class="leftsidebar_accordion active" id="project_panel_title">Project</button>
-        <div class="leftsidebar_accordion_panel show" id="img_fn_list_panel">
+        <button style="display: none;" class="leftsidebar_accordion active" id="project_panel_title">Project</button>
+        <div style="display: none;" class="leftsidebar_accordion_panel show" id="img_fn_list_panel">
           <div id="project_info_panel">
             <div class="row">
               <span class="col"><label for="project_name">Name: </label></span>
@@ -584,28 +623,29 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
         </div>
 
         <!-- Attributes -->
-        <button class="leftsidebar_accordion" id="attributes_editor_panel_title">Attributes</button>
-        <div class="leftsidebar_accordion_panel" id="attributes_editor_panel">
-          <div class="button_panel" style="padding:1rem 0;">
+        <button class="leftsidebar_accordion active" id="attributes_editor_panel_title">Attributes</button>
+        <div class="leftsidebar_accordion_panel show" id="attributes_editor_panel">
+          <div class="button_panel" style="display: none;">
             <span class="text_button" onclick="show_region_attributes_update_panel()" id="button_show_region_attributes" title="Show region attributes">Region Attributes</span>
             <span class="text_button" onclick="show_file_attributes_update_panel()" id="button_show_file_attributes" title="Show file attributes">File Attributes</span>
           </div>
-          <div id="attributes_update_panel">
-            <div class="button_panel">
+          <div id="attributes_update_panel" >
+            <div class="button_panel" style="display: none;">
               <input style="width:70%" type="text" placeholder="attribute name" id="user_input_attribute_id" value="">
               <span id="button_add_new_attribute" class="button" onclick="add_new_attribute_from_user_input()" title="Add new attribute">&plus;</span>
               <span id="button_del_attribute" class="button" onclick="delete_existing_attribute_with_confirm()" title="Delete existing attribute">&minus;</span>
             </div>
-            <div class="button_panel" style="margin:0.1rem 0;" >
+            <div class="button_panel" style="display: none;" >
               <select style="width:100%" id="attributes_name_list" onchange="update_current_attribute_id(this)" title="List of existing attributes"></select>
             </div>
-            <div id="attribute_properties"></div>
+            <div style="display: none;" id="attribute_properties"></div>
             <div id="attribute_options"></div>
             <p style="text-align:center">
               <span class="text_button" title="Show a spreadsheet like editor for all manual annotations" onclick="annotation_editor_toggle_all_regions_editor()">Toggle Annotation Editor</span>
             </p>
           </div>
         </div>
+        <div id="annotation_editor_panel2" style="width: 100%;height: fit-content;"></div>
 
         <button class="leftsidebar_accordion">Keyboard Shortcuts</button>
         <div class="leftsidebar_accordion_panel">
@@ -1204,7 +1244,7 @@ var _via_user_input_cancel_handler = null;
 var _via_user_input_data           = {};
 
 // annotation editor
-var _via_annotaion_editor_panel     = document.getElementById('annotation_editor_panel');
+var _via_annotaion_editor_panel     = document.getElementById('annotation_editor_panel2');
 var _via_metadata_being_updated     = 'region'; // {region, file}
 var _via_annotation_editor_mode     = VIA_ANNOTATION_EDITOR_MODE.SINGLE_REGION;
 
@@ -4959,13 +4999,8 @@ function _via_handle_global_keydown_event(e) {
   }
 
   if ( e.key === ' ' ) { // Space key
-    if ( e.ctrlKey ) {
-      annotation_editor_toggle_on_image_editor();
-    } else {
-      annotation_editor_toggle_all_regions_editor();
-    }
-    e.preventDefault();
-    return;
+    save_and_next()
+    
   }
 
   if ( e.key === 'F1' ) { // F1 for help
@@ -6183,7 +6218,7 @@ function toggle_attributes_editor() {
 // items like Keyboard Shortcut hidden under the attributes panel
 function update_vertical_space() {
   var panel = document.getElementById('vertical_space');
-  var aepanel = document.getElementById('annotation_editor_panel');
+  var aepanel = document.getElementById('annotation_editor_panel2');
   panel.style.height = (aepanel.offsetHeight + 40) + 'px';
 }
 
@@ -6871,6 +6906,7 @@ function add_new_attribute_from_user_input() {
   }
 }
 
+
 function add_new_attribute(attribute_id) {
   _via_attributes[_via_attribute_being_updated][attribute_id] = {};
   _via_attributes[_via_attribute_being_updated][attribute_id].type = 'text';
@@ -7327,7 +7363,7 @@ function annotation_editor_remove() {
 }
 
 function is_annotation_editor_visible() {
-  return document.getElementById('annotation_editor_panel').classList.contains('display_block');
+  return 
 }
 
 function annotation_editor_toggle_all_regions_editor() {
@@ -7337,7 +7373,7 @@ function annotation_editor_toggle_all_regions_editor() {
     _via_annotation_editor_mode = VIA_ANNOTATION_EDITOR_MODE.SINGLE_REGION;
   } else {
     _via_annotation_editor_mode = VIA_ANNOTATION_EDITOR_MODE.ALL_REGIONS;
-    p.classList.add('display_block');
+    
     p.style.height = _via_settings.ui.annotation_editor_height + '%';
     p.style.fontSize = _via_settings.ui.annotation_editor_fontsize + 'rem';
     annotation_editor_show();
@@ -11051,18 +11087,7 @@ function generate_img_index_list(input) {
 }
 
 if ( ! _via_is_debug_mode ) {
-  // warn user of possible loss of data
-  window.onbeforeunload = function (e) {
-    e = e || window.event;
-
-    // For IE and Firefox prior to version 4
-    if (e) {
-      e.returnValue = 'Did you save your data?';
-    }
-
-    // For Safari
-    return 'Did you save your data?';
-  };
+  upload_all_region_data()
 }
 
 //
@@ -11271,7 +11296,7 @@ let json = {
                 "width": {{ region['shape_attributes']['width'] }},
                 "height": {{ region['shape_attributes']['height'] }}
               },
-              
+              'region_attributes': {'objet': '{{ region['region_attributes']['objet']}}' },
             },
           {% endfor %}
           ],
@@ -11280,7 +11305,6 @@ let json = {
         },
 
   };
-
 
 
 
@@ -11296,9 +11320,10 @@ import_json(json)
 
   window.addEventListener('load', function() {
     jump_to_image(0);
-});
+}
+);
 
-
+add_atributes();
 
 
 
@@ -11361,7 +11386,7 @@ function upload_all_region_data(type, file_extension) {
         .then(function (jsonResponse) {
           // Faire quelque chose avec la réponse JSON 
           console.log(jsonResponse);
-          window.location.href='{{ url_for('overview') }}'
+          
         })
         .catch(function (error) {
           console.error('There was a problem with the fetch operation:', error);
@@ -11372,13 +11397,70 @@ function upload_all_region_data(type, file_extension) {
     });
 }
 
+function add_atributes(){
+  add_attribute_on_start()
+
+const selectElement = document.getElementById('attribute_type');
+selectElement.value = 'dropdown';
+const changeEvent = new Event('change');
+selectElement.dispatchEvent(changeEvent);
 
 
+const changeEventbis = new Event('change');
+selectElement.dispatchEvent(changeEventbis)
+const inputElement = document.getElementById('_via_attribute_new_option_id');
+
+const changeEvent3 = new Event('change');
+{% for objet in liste_objet %}
+
+// Définissez la valeur du champ de saisie
+inputElement.value = '{{objet}}';
+// Créez un nouvel événement 'change'
+inputElement.dispatchEvent(changeEvent3);
+
+{% endfor %}
+
+region_visualisation_update('region_label', '__via_region_id__', 1);
+annotation_editor_toggle_all_regions_editor()
+}
+
+{% if nextimage %}
+function save_and_next(){
+  upload_all_region_data()
+  window.location.href = "{{ url_for('labelling',pathname=filepath[0],dirname=filepath[1], filename=nextimage,model=model) }}";
+
+}
+{% else %}
+function save_and_next(){
+  upload_all_region_data()
+  window.location.href = "{{ url_for('overview_dir',dirname=filepath[1]) }}";
+
+}
+{% endif %}
+
+function volet_code(value){
+  if(value == "open"){
+    document.getElementById('page_model').style.display = 'flex';
+    }
+  if(value == "close"){
+      document.getElementById('page_model').style.display = 'none';
+    }
+  
+}
+function load_model(id_model){
+  window.location.href = "{{ url_for('labelling',pathname=filepath[0],dirname=filepath[1], filename=filepath[2],model=id_model) }}" + id_model;
+  
+}
 
 
-
-
-
+function add_attribute_on_start() {
+  let attr_id='objet';
+  _via_current_attribute_id = attr_id;
+    add_new_attribute(attr_id);
+    update_attributes_update_panel();
+    annotation_editor_update_content();
+    show_message('Added ' + _via_attribute_being_updated + ' attribute [' + attr_id + '].');
+}
 </script>
 <!-- END: Contents of file: via.js-->
   </body>

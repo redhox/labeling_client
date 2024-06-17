@@ -1,24 +1,7 @@
-<head>
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css"
-  />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/css-pro-layout@1.1.0/dist/css/css-pro-layout.css"
-  />
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
-  />
-  <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='/css/sidebar.css') }}"
-  />
-  <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='/css/icons.css') }}"
-  />
+<nav>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='/css/sidebar.css') }}"/>
+
   <div class="layout has-sidebar fixed-sidebar fixed-header sidebar">
     <aside id="sidebar" class="sidebar break-point-sm has-bg-image">
       <a id="btn-collapse" class="sidebar-collapser"
@@ -31,9 +14,7 @@
           <div class="pro-sidebar-logo">
             
             <h5>image-label</h5>
-            <div class="user_info">
-              <p class="">{{user}}</p>
-            </div>
+            
           </div>
         </div>
         <div class="sidebar-content">
@@ -56,12 +37,16 @@
                   <span class="menu-title">Overview</span>
                 </a>
               </li>
-              
-              <li class="menu-header" style="padding-top: 20px">
-                <span> EXTRA </span>
-              </li>
-              <li class="menu-item"></li>
-              
+              {% if user['is_admin'] == True %}
+              <li class="menu-item">
+              <a href="{{ url_for('model_list') }}">
+                <span class="menu-icon">
+                  <i class="gg-log-out"></i>
+                </span>
+                <span class="menu-title">Model</span>
+              </a>
+            </li>
+              {% endif %}
               <li class="menu-item">
                 <a href="{{ url_for('logout') }}">
                   <span class="menu-icon">
@@ -78,4 +63,4 @@
   </div>
   <script src="https://unpkg.com/@popperjs/core@2"></script>
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-</head>
+</nav>

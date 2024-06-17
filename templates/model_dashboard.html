@@ -1,0 +1,95 @@
+{% extends 'container.html' %}
+{% block content %}
+{% include 'navtop.html'%}
+<main style="display: flex;flex-direction: row;">
+<div class="colonne">
+<h2>list actif</h2>
+<div id="model-data"></div>
+</div>
+<div class="colonne">
+<h2>list all</h2>
+
+{% for model in list_model_all %}
+
+<div  style="border:solid 3px #000000; max-width: 500px;padding: 10px;margin:20px">
+    <h3>{{model.run_name}}</h3>
+    <p>{{model.run_id}}</p>
+    <p>{{model.experiment_id}}</p>
+    <code>{{model.metrics}}</code>
+    <button onclick="add_model('{{model.run_id}}')"> add model</button>
+</div>
+
+{% endfor %}
+</div>
+
+
+</main>
+
+
+<script>
+
+
+
+
+// JavaScript
+function fetch_model() {
+    fetch("{{ url_for('liste_actif_model') }}")
+   .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error status: ${response.status}`);
+        }
+        return response.json(); // Convertit la réponse en JSON
+    })
+   .then(data => {
+        // Sélectionnez la div où vous voulez afficher les données
+        const modelDiv = document.getElementById('model-data');
+        
+        // Construisez le contenu HTML à partir des données récupérées
+        let htmlContent = '';
+        data.forEach(model => {
+            htmlContent += `
+                <div style="border:solid 3px #000000; max-width: 500px;padding: 10px;margin:20px">
+                    <h3>${model.run_name}</h3>
+                    <p>${model.run_id}</p>
+                    <p>${model.experiment_id}</p>
+                    <code>${JSON.stringify(model.metrics)}</code>
+                    <button onclick="del_model('${model.run_id}')">Del Model</button>
+                </div>`;
+        });
+        
+        // Insérez le contenu HTML dans la div sélectionnée
+        modelDiv.innerHTML = htmlContent;
+    })
+   .catch(error => {
+        console.error('Erreur lors de la récupération des données:', error);
+    });
+}
+
+
+
+window.onload = fetch_model();
+
+
+function add_model(id_model){
+    fetch("{{ url_for('add_model_list',id_model='') }}"+ id_model)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        // Ici, vous pouvez ajouter du code supplémentaire si nécessaire avant de lancer fetch_model()
+        return fetch_model();
+    });
+  }
+  function del_model(id_model){
+    fetch("{{ url_for('del_model_list',id_model='') }}"+ id_model)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        // Ici, vous pouvez ajouter du code supplémentaire si nécessaire avant de lancer fetch_model()
+        return fetch_model();
+    });
+  }
+
+</script>
+{% endblock %}
