@@ -17,6 +17,7 @@ import uuid
 from bson import json_util
 from PIL import Image
 import io
+from git import Repo
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECTRET_KEY')
 SERVER_URL = os.environ.get("SERVER_URL")
@@ -121,7 +122,16 @@ def images_in_dir(path):
                 image_list.append(fichier)
     return image_list
 
- 
+def need_update():
+    repo = Repo('.')
+    current_commit = repo.head.commit
+    repo.remotes.origin.fetch()
+    origin_main_commit = repo.commit('origin/main')
+    if current_commit == origin_main_commit:
+        return True
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -150,6 +160,19 @@ def dashboard():
     return render_template('dashboard.html',token=token , user=user)
      
 
+@app.route('/update')
+@check_authentication
+def update():
+    repo = Repo('.')
+    repo.remotes.origin.pull()
+    return login()
+     
+
+
+@app.context_processor
+def inject_global_variables():
+    data={"need_update": need_update()}
+    return dict(global_variable=data)
 
 @app.route('/labelling/<pathname>/<dirname>/<filename>/<string:model>', methods=['GET'])
 @check_authentication 
