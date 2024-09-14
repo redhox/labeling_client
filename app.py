@@ -128,6 +128,8 @@ def need_update():
     repo.remotes.origin.fetch()
     origin_main_commit = repo.commit('origin/main')
     if current_commit == origin_main_commit:
+        return False
+    else:
         return True
 
 
