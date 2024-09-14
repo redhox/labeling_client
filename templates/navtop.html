@@ -8,7 +8,7 @@
 </div>
 
 <div style="float: right;">
-    <a href="{{ url for('update') }}">{{global_variable}}</a>
+    <a href="{{ url_for('update') }}">{{global_variable}}</a>
     {{user['username']}}
     {{user['mail']}}
     {% if user['is_admin'] == True %}
