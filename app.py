@@ -18,11 +18,17 @@ from bson import json_util
 from PIL import Image
 import io
 from git import Repo
+import os
+import zipfile
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECTRET_KEY')
 SERVER_URL = os.environ.get("SERVER_URL")
 # app.config['PREFERRED_URL_SCHEME'] = 'http'
- 
+TEMP_FOLDER = 'temp_folder'
+
+if not os.path.exists(TEMP_FOLDER):
+    os.makedirs(TEMP_FOLDER)
 # uuid pour la machine
 load_dotenv()
 if os.getenv('UUID_MACHINE') == None:
@@ -326,9 +332,75 @@ def overview_dir(dirname):
     images = images_in_dir(f'/image_dir/{dirname}')
     path=f'image_dir'
     model='model_non_actif'
-    return render_template('overview_img.html', images=images,path=path,dirname=dirname, user=user,model=model)
+    print("overvei dirname")
+    print({"uuid": UUID_MACHINE,"projet_name":dirname,"download":False})
+    
+    response = requests.post( 
+        f"{SERVER_URL}/images/labels",
+        json={"uuid": UUID_MACHINE,"projet_name":dirname,"download":False})
+    response_data = response.json()
+    print("reponce label data",response_data)
+    data_label = json.loads(response_data)
+
+    return render_template('overview_img.html', images=images,path=path,dirname=dirname, user=user,model=model,data_label=data_label)
 
 
+
+def create_zip_from_list(text_list,projet_name):
+    # Utiliser un fichier en mémoire pour stocker le zip
+    memory_file = io.BytesIO()
+    
+    with zipfile.ZipFile(memory_file, 'w') as zf:
+        for element in text_list:
+            # Créer le nom du fichier, par exemple "file_1.txt"
+            filename = f"{element['filename']}.txt"
+            
+            # Chemin complet du fichier
+            file_path = f'{TEMP_FOLDER}/{projet_name}/{filename}'
+            # Créer un fichier txt pour chaque ligne
+            with open(file_path, 'a') as f:
+                f.write('#objet x y width height \n')
+            for region in element['regions']:
+
+                result_string = f"{region['region_attributes']['objet'],region['shape_attributes']['x'],region['shape_attributes']['y'],region['shape_attributes']['width'],region['shape_attributes']['height']}"
+                with open(file_path, 'a') as f:
+                    f.write(f'{result_string}\n')
+            
+            # Ajouter chaque fichier dans le zip
+            zf.write(file_path, filename)
+            os.remove(f'{file_path}')
+
+            
+
+    # Revenir au début du fichier en mémoire
+    memory_file.seek(0)
+    return memory_file
+
+
+
+@app.route('/download_label/<projet_name>')
+@check_authentication
+def download_label(projet_name):
+    # S'assurer que le dossier existe
+    if not os.path.exists(f'{TEMP_FOLDER}/{projet_name}'):
+        os.makedirs(f'{TEMP_FOLDER}/{projet_name}')
+    
+    
+    response = requests.post( 
+        f"{SERVER_URL}/images/labels",
+        json={"uuid": UUID_MACHINE,"projet_name":projet_name,"download":True})
+    response_data = response.json()
+    data = json.loads(response_data)
+    print('data:',data)
+   # Créer un fichier zip depuis la liste de textes
+    memory_file = create_zip_from_list(data,projet_name)
+    # if os.path.exists(f'{TEMP_FOLDER}/{projet_name}'):
+    #     os.remove(f'{TEMP_FOLDER}/{projet_name}')
+    # Envoyer le fichier zip pour le téléchargement
+    if memory_file:
+        return send_file(memory_file, download_name=f'{projet_name}.zip', as_attachment=True)
+    else:
+        return "Erreur lors de la création du fichier zip.", 500
 
 
 @app.route('/model_list')
