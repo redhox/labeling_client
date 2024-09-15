@@ -299,6 +299,7 @@ def resultat():
             return jsonify({"message": " File uploaded successfully"}), 200 
 
 @app.route('/get_image/<pathname>/<dirname>/<filename>' ,methods=['GET'])
+@check_authentication
 def get_image(pathname,dirname,filename):
     print("getimage")
     image_path = f'/{pathname}/{dirname}/{filename}'
@@ -307,6 +308,7 @@ def get_image(pathname,dirname,filename):
 
     
 @app.route('/get_image_thumbnail/<pathname>/<dirname>/<filename>' ,methods=['GET'])
+@check_authentication
 def get_image_thumbnail(pathname,dirname,filename):
     print("getimage")
     image_path = f'/{pathname}/{dirname}/{filename}'
@@ -450,7 +452,7 @@ def liste_actif_model():
 
 
 
-@app.route('/logout') 
+@app.route('/logout')
 def logout():
     session.clear()
     return render_template('login.html')
