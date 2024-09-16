@@ -167,12 +167,95 @@ def dashboard():
     print("dashboard",user)
     return render_template('dashboard.html',token=token , user=user)
      
+@app.route('/user_management')
+@check_authentication
+def user_management():
+    token = session.get('token') 
+    headers = {'Authorization': f'JWT {token}'} 
+    user=get_current_user()
 
+    headers = {'Authorization': f'JWT {token}'}
+    response = requests.post(f'{SERVER_URL}/users/get_all_users', headers=headers)
+    if response.status_code == 200:
+
+        response_data = response.json()
+        print("reponce label data",response_data)
+    
+    return render_template('user_management.html',token=token , user=user,users=response_data)
+
+
+@app.route('/register',methods=['POST'])
+@check_authentication
+def register():
+    token = session.get('token') 
+    headers = {'Authorization': f'JWT {token}'} 
+    print('register')
+    username = request.form['username']
+    password = request.form['password']
+    email = request.form['email']
+
+    role = request.form['role']
+    data = {
+        'username': username,
+        'email': email,
+        'password': password
+    }
+    print('ici ça va') 
+    response = requests.post(f'{SERVER_URL}/users',json=data , headers=headers)
+    print(response)
+    return user_management() 
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+@app.route('/switch-role/<int:user_id>',methods=['POST'])
+@check_authentication
+def switch_role(user_id):
+    token = session.get('token') 
+    headers = {'Authorization': f'JWT {token}'} 
+
+    response = requests.post(
+    f'{SERVER_URL}/users/ids', headers=headers , json={'user_id':user_id})
+    response.raise_for_status()
+    user_data = response.json()
+
+
+    if user_data[3] == True:
+        new_role = False
+    if user_data[3] == False:
+        new_role = True
+    print('new_role',new_role)
+    response = requests.post(
+    f'{SERVER_URL}/users/switch_role', headers=headers , json={'user_id':user_id,'role_is_admin':new_role})
+    response.raise_for_status()
+
+    return user_management()
+
+@app.route('/delete_user/<int:user_id>',methods=['POST']) 
+@check_authentication
+def delete_user(user_id):
+    token = session.get('token') 
+    headers = {'Authorization': f'JWT {token}'} 
+    response = requests.post(
+    f'{SERVER_URL}/users/delete', headers=headers , json={'user_id':user_id})
+    response.raise_for_status()
+
+    return user_management()
+    
+ 
 @app.route('/update')
 @check_authentication
 def update():
     repo = Repo('.')
-    repo.remotes.origin.pull()
+    repo.remotes.origin.pull() 
     return login()
      
 

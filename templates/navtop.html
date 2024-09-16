@@ -15,6 +15,7 @@
     {{user['mail']}}
     {% if user['is_admin'] == True %}
         role: admin
+        <a href="{{ url_for('user_management') }}">user_management</a>
     {% endif %}
 
  lougout 
