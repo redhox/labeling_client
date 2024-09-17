@@ -20,7 +20,7 @@ import io
 from git import Repo
 import os
 import zipfile
-
+from user_agents import parse
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECTRET_KEY')
 SERVER_URL = os.environ.get("SERVER_URL")
@@ -36,32 +36,34 @@ if os.getenv('UUID_MACHINE') == None:
         f.write(f"UUID_MACHINE={uuid.uuid4()}\n")
 
 UUID_MACHINE=os.getenv('UUID_MACHINE')
-def get_token(email, password):
+def get_token(email, password,ip_address,user_agent_parsed):
     url = f'{SERVER_URL}/users/token'
-    data = {'email': email, 'password': password}
+    data = {'email': email, 'password': password,"uuid_machine":UUID_MACHINE,"ip_address":ip_address,"user_agent": f"{user_agent_parsed}"}
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.post(url, json=data, headers=headers)
         response.raise_for_status()  # Raises an HTTPError if the response status code is 4XX/5XX
-        return response.json().get('access_token')
+        print('reponce au token',response.json())
+        print('Raw response:', response.text) 
+        return response.json().get('access_token') ,response.json().get('last_login')
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
-        return None
+        return None ,None
 
 
-def get_current_user():
+def get_current_user(): 
     token = session.get('token')
-    print('token',token)
-    if token:
+    print('token',token) 
+    if token: 
         headers = {
             'Authorization': f'Bearer {token}',
         }
         print('headers',headers,f'url {SERVER_URL}/users/protected_route')
-        response = requests.post(f'{SERVER_URL}/users/protected_route', headers=headers)
+        response = requests.post(f'{SERVER_URL}/users/protected_route', headers=headers)  
 
-        # headers = {'Authorization': f'Bearer {token}'}
-        # response = requests.get(f'{SERVER_URL}/users/protected_route', headers=headers)
-
+        # headers = {'Authorization': f'Bearer {token}'} 
+        # response = requests.get(f'{SERVER_URL}/users/protected_route', headers=headers)  
+ 
         if response.status_code == 200:
             user_data = response.json()
             return user_data
@@ -71,7 +73,7 @@ def get_current_user():
     return login()
 
 def check_authentication(func):
-    @wraps(func)
+    @wraps(func) 
     def wrapper(*args, **kwargs):
         # Check if the current route is the "predict_route"
         if request.endpoint == 'predict_route':
@@ -108,7 +110,6 @@ def check_authentication(func):
 def compter_elements_dans_dossier(dossier):
     return len([f for f in sorted(os.listdir(dossier)) if os.path.isfile(os.path.join(dossier, f))])
 
-
 def dir_in_dir(path):
     dir_list=[]
     for racine, sous_dossiers, fichiers in sorted(os.walk(path)):
@@ -142,30 +143,39 @@ def need_update():
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    user_agent = request.user_agent.string
+    user_agent_parsed = parse(user_agent)
+    ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        token = get_token(email, password)
+        token,last_login = get_token(email, password,ip_address,user_agent_parsed)
+        print('token',token)
         if token:
             session['token'] = token  # Store the token in the session
+            session['last_login']=last_login
             return redirect(url_for('dashboard'))
         else:
             return jsonify({'message':'auth fail'})
     
     if session.get('token'):
         return redirect(url_for('dashboard'))
-    return render_template('login.html')
-    
+    print('pls')
+    return render_template('login.html') 
+
 
 @app.route('/dashboard')
 @check_authentication
 def dashboard():
+        
+
+    last_login = session.get('last_login')
     token = session.get('token') 
     headers = {'Authorization': f'JWT {token}'}
-    user=get_current_user()
+    user=get_current_user() 
     print("dashboard")
-    print("dashboard",user)
-    return render_template('dashboard.html',token=token , user=user)
+    print("dashboard",user) 
+    return render_template('dashboard.html',token=token , user=user,last_login=last_login)
      
 @app.route('/user_management')
 @check_authentication
@@ -174,8 +184,8 @@ def user_management():
     headers = {'Authorization': f'JWT {token}'} 
     user=get_current_user()
 
-    headers = {'Authorization': f'JWT {token}'}
-    response = requests.post(f'{SERVER_URL}/users/get_all_users', headers=headers)
+    headers = {'Authorization': f'JWT {token}'} 
+    response = requests.post(f'{SERVER_URL}/users/get_all_users', headers=headers)  
     if response.status_code == 200:
 
         response_data = response.json()
