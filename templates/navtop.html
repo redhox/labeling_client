@@ -1,23 +1,51 @@
-<header style="width: 100%; background-color: rgb(212, 50, 77); overflow: auto; ">
-<div style="float: left; /* Aligne l'élément à gauche */">
-    <a href="{{ url_for('dashboard') }}">dashboard</a>
-    <a href="{{ url_for('overview') }}">overview</a>
-    {% if user['is_admin'] == True %}
-    <a href="{{ url_for('model_list') }}"><span class="menu-title">Model</span></a>
-    {% endif %}
-</div>
+<style>
+body{background-color: #f0f7fa;}
+nav {
+  background-color: #2196F3; /* Bleu caractéristique de Fluent Design */
+  overflow: hidden;
+}
 
-<div style="float: right;">
-    {% if global_variable.need_update == True %}
-    <a href="{{ url_for('update') }}">update</a>
-    {% endif %}
-    {{user['username']}}
-    {{user['mail']}}
-    <a href="{{ url_for('user_management') }}">user_management</a>
-    {% if user['is_admin'] == True %}
-        role: admin
-    {% endif %}
-    <a href="{{ url_for('logout') }}">lougout </a>
- 
-</div>
-</header>
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav li {
+  float: left;
+}
+
+nav li a {
+  display:  
+ block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+
+nav li a:hover {
+  background-color:  
+ #0069c0;
+}
+
+</style>
+
+<nav>
+    <ul>
+
+        <li><a href="{{ url_for('overview') }}">Overview</a></li>
+        {% if user['is_admin'] == True %}
+        <li><a href="{{ url_for('model_list') }}">Model</a></li>
+        {% endif %}
+        {% if global_variable.need_update == True %}
+        <li><a href="{{ url_for('update') }}">Update</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('user_management') }}">{{user['username']}}</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout </a></li>
+
+    </ul>
+</nav>

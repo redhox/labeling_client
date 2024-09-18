@@ -145,9 +145,14 @@ def login():
     user_agent = request.user_agent.string
     user_agent_parsed = parse(user_agent)
     ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+        try:
+            email = request.form['email']
+            password = request.form['password']
+        except:
+            return render_template('login.html') 
+
         token,last_login = get_token(email, password,ip_address,user_agent_parsed)
         print('token',token)
         if token:
@@ -208,25 +213,25 @@ def register():
     print('register')
     username = request.form['username']
     password = request.form['password']
-    email = request.form['email']
+    email = request.form['email'] 
 
-    role = request.form['role']
+
     data = {
-        'username': username,
-        'email': email,
-        'password': password
+        "username": username,
+        "email": email,
+        "password": password
     }
-    print('ici ça va') 
-    response = requests.post(f'{SERVER_URL}/users',json=data , headers=headers)
-    print(response)
+    print('ici ça va',data ) 
+    response = requests.post(f'{SERVER_URL}/users/',json=data , headers=headers)
+    print(response) 
     return user_management() 
  
-
-
-
-
+ 
 
  
+
+
+  
 
 
 
@@ -259,11 +264,13 @@ def switch_role(user_id):
 @check_authentication
 def delete_user(user_id):
     token = session.get('token') 
+    user=get_current_user() 
     headers = {'Authorization': f'JWT {token}'} 
     response = requests.post(
     f'{SERVER_URL}/users/delete', headers=headers , json={'user_id':user_id})
     response.raise_for_status()
-
+    if user['id']==user_id:
+        return logout()
     return user_management()
     
  
@@ -555,6 +562,7 @@ def liste_actif_model():
 def logout():
     session.clear()
     return login()
+
 
 
 if __name__ == '__main__':
