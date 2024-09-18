@@ -140,7 +140,6 @@ def need_update():
         return True
 
 
-
 @app.route('/', methods=['GET', 'POST'])
 def login():
     user_agent = request.user_agent.string
@@ -166,7 +165,7 @@ def login():
 
 @app.route('/dashboard')
 @check_authentication
-def dashboard():
+def dashboard(): 
         
 
     last_login = session.get('last_login')
@@ -181,16 +180,23 @@ def dashboard():
 @check_authentication
 def user_management():
     token = session.get('token') 
-    headers = {'Authorization': f'JWT {token}'} 
+    headers = {'Authorization': f'JWT {token}'}
     user=get_current_user()
-
-    headers = {'Authorization': f'JWT {token}'} 
-    response = requests.post(f'{SERVER_URL}/users/get_all_users', headers=headers)  
-    if response.status_code == 200:
-
-        response_data = response.json()
-        print("reponce label data",response_data)
     
+    headers = {'Authorization': f'JWT {token}'} 
+    if user['is_admin'] == True:
+        response = requests.post(f'{SERVER_URL}/users/get_all_users', headers=headers)   
+        if response.status_code == 200:
+
+            response_data = response.json()
+            print("reponce label data",response_data)
+    else:
+        response = requests.post(f'{SERVER_URL}/users/ids', headers=headers ,json={'user_id':user['id']})   
+        if response.status_code == 200:
+
+            response_data = [response.json()]
+            print("reponce label data",response_data)
+
     return render_template('user_management.html',token=token , user=user,users=response_data)
 
 
@@ -548,7 +554,7 @@ def liste_actif_model():
 @app.route('/logout')
 def logout():
     session.clear()
-    return render_template('login.html')
+    return login()
 
 
 if __name__ == '__main__':

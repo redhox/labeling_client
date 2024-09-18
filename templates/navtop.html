@@ -13,11 +13,11 @@
     {% endif %}
     {{user['username']}}
     {{user['mail']}}
+    <a href="{{ url_for('user_management') }}">user_management</a>
     {% if user['is_admin'] == True %}
         role: admin
-        <a href="{{ url_for('user_management') }}">user_management</a>
     {% endif %}
-
- lougout 
+    <a href="{{ url_for('logout') }}">lougout </a>
+ 
 </div>
 </header>

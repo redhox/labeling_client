@@ -1,6 +1,6 @@
 <head>
   <meta charset="UTF-8" />
-  <title>Intradys - User Management</title>
+  <title> User Management</title>
   <link
     rel="stylesheet"
     href="{{ url_for('static', filename='/css/user_management.css') }}"
@@ -17,7 +17,7 @@
 
     // Parcourir toutes les lignes de la table
     for (i = 0; i < tr.length; i++) {
-      // Parcourir toutes les colonnes de chaque ligne
+      // Parcourir toutes les colonnes de chaque ligne 
       for (j = 0; j < tr[i].getElementsByTagName("td").length; j++) {
         td = tr[i].getElementsByTagName("td")[j];
         if (td) {
@@ -51,7 +51,9 @@
         <tr>
           <td>{{ user[1] }}</td>
           <td id="test">{% if user[3] == True %} admin {% else %}  user {% endif %}</td>
+          
           <td>
+            {% if user[3] == True %}
             <form
               id="switchForm"
               action="{{ url_for('switch_role', user_id=user[0]) }}"
@@ -68,7 +70,7 @@
           </button>
               </div>
             </form>
-
+            {% endif %}
             <form
               id="deleteForm"
               action="{{ url_for('delete_user', user_id=user[0]) }}"
