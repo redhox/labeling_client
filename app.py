@@ -158,12 +158,12 @@ def login():
         if token:
             session['token'] = token  # Store the token in the session
             session['last_login']=last_login
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('overview'))
         else:
             return jsonify({'message':'auth fail'})
     
     if session.get('token'):
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('overview'))
     print('pls')
     return render_template('login.html') 
 

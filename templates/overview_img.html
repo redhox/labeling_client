@@ -2,28 +2,60 @@
   {% extends 'container.html' %}
   {% block content %}
   {% include 'navtop.html'%}
-  <div class="content">
-    <div class="header_wrap" style="width: 100%;height: 70vh;overflow: scroll;">
-      {% if data_label["message"] == True %}               <a href="{{ url_for('download_label',projet_name=dirname)}}" style="display: flex;flex-direction: column;">dl</a>
-      {% endif %}
-      <table class="table table-striped table-class" id="table-id">
-        
-        <tbody>
-          {% for image in images %}
-          {% set image_url = path ~ '/' ~ image[0] %}
-          <tr style="float: left;">
-            <td >
-              <a href="{{ url_for('labelling',pathname=path,dirname=dirname, filename=image, model=model) }}" style="display: flex;flex-direction: column;">
-                <img src=" {{ url_for('get_image_thumbnail',pathname=path,dirname=dirname, filename=image) }}"></img>{{ path }} plus {{image[0]}}
-              </a>
-            </td>
-            <td></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <!-- Liens de pagination -->
 
+<style>
+  .content {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f0f0f0;  
+
+}
+
+.list {
+  display: flex;
+  flex-direction: row;
+  list-style: none;
+  padding: 0;
+  text-align: center;
+
+}
+
+.list li {
+    background-color: #ffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+    padding: 15px;
+    min-width: 200px;
+    height: 200px;
+    font-size: x-large;
+    align-content: center;
+}
+.list li a{
+  text-decoration: none;
+  color: black;
+}</style>
+  <div class="content">
+    <h1>{{dirname}}</h1>
+      {% if data_label["message"] == True %}
+        <a href="{{ url_for('download_label',projet_name=dirname)}}">
+          <button>datasets download</button>
+        </a>
+      {% endif %}
+      
+
+
+
+
+      <ul class="list">
+        {% for image in images %}
+        <li><a href="{{ url_for('labelling',pathname=path,dirname=dirname, filename=image, model=model) }}" style="display: flex;flex-direction: column;"> 
+                         <img src=" {{ url_for('get_image_thumbnail',pathname=path,dirname=dirname, filename=image) }}" style="height: 90%;"></img>{{image}}</a></li>
+        {% endfor %}
+      </ul>
 
     {% endblock %}
 

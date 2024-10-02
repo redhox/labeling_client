@@ -62,6 +62,88 @@ main {
   transform: scale(1.05);
   transition: all 0.2s ease-in-out;
 }
+/* Table Styles */
+.table-class {
+  width: 100%;  /* Ensures table takes up full width */
+  border-collapse: collapse;
+  border-radius: 8px; /* Adds subtle rounded corners */
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.1); /* Adds a light shadow for depth */
+  margin-bottom: 1rem; /* Adds some spacing below the table */
+}
+
+.table-class thead {
+  background-color: #f2f2f2; /* Light gray background for header */
+}
+
+.table-class th,
+.table-class td {
+  size: 100px;
+  padding: 10px 15px; /* Consistent padding for cells */
+  border: 1px solid #ddd; /* Light gray borders */
+  text-align: left; /* Align content to the left */
+}
+td{
+  min-width:200px;
+  width: fit-content;
+}
+th{
+  min-width:200px;
+}
+tr{
+  display: flex;
+  flex-direction: row;
+}
+/* Responsive Design for Smaller Screens */
+@media (max-width: 768px) {
+  .table-class {
+    display: block;
+    overflow-x: auto; /* Allows horizontal scrolling on small screens */
+  }
+
+  .table-class thead tr {
+    display: block;
+  }
+
+  .table-class th,
+  .table-class td {
+    display: block;
+    border: none;
+    border-bottom: 1px solid #ddd; /* Maintains bottom border for rows */
+    padding: 10px;
+  }
+
+  .table-class th:before {
+    content: attr(data-label); /* Displays data-label attribute for headers */
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px; /* Adds a small gap between label and content */
+  }
+}
+
+/* Style the Buttons (can be further customized) */
+.table-class button {
+  background: none;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out; /* Smooth hover effect */
+}
+
+.table-class button:hover {
+  background-color: #eee; /* Light background on hover */
+}
+
+.table-class button i {
+  margin-right: 5px; /* Adds a small margin between icon and text */
+}
+
+/* Optional: Centering Content in Cells (if desired) */
+.table-class td {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 </style>
 <div class="content">
