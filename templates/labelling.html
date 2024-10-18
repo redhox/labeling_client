@@ -221,24 +221,101 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
 
 .force_small_font { font-size:small !important; }
 .key { font-family:monospace; padding:1px 6px; background:linear-gradient(to bottom,#f0f0f0,#fcfcfc);; border:1px solid #e0e0e0; white-space:nowrap; color:#303030; border-bottom-width:2px; border-radius:3px; font-size:1.2em; }
+
+
+main {
+        display: flex;
+        flex-direction: column;
+
+        overflow: hidden;
+    }
+
+    .colonne {
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        overflow-y: auto;
+
+    }
+
+    h2 {
+        margin-bottom: 20px;
+    }
+
+    .model-item {
+        border: solid 3px #000000;
+        max-width: 500px;
+        padding: 10px;
+        margin: 20px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    h3 {
+        margin-bottom: 10px;
+    }
+
+    p {
+        margin-bottom: 5px;
+    }
+
+    code {
+        display: block;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 5px;
+        overflow-x: auto;
+        max-height: 200px;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #28a3d7;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover  
+      {
+        background-color: #1b5269;
+    }
+    .bulle_model{
+
+        
+         height: 300px;
+         width: 500px;
+         padding: 10px;
+         margin:20px;
+         border-radius: 15px;
+         background-color: #f5f5f5;;
+    }
+    .bulle_model > code{
+        height: 100px;
+    margin-bottom: 15px;
+    background-color: #ebf5fd;
+    border-radius: 5px;
+    border: solid 1px ;
+    }
+
 </style>
 <!-- END: Contents of file: via.css-->
   </head>
-  {% include 'navtop.html'%}
   <body onload="_via_init()" onresize="_via_update_ui_components()">
     
     
-    <div  id="page_model" style="z-index: 99; display: none; position: absolute; height: 100vh; width: 100%;align-items: center; justify-content: center;">
-      <div   style=" display: flex; flex-direction: column; 20px; width: 80%;height: 60%; background-color: red;">
-        <div style="height: 80%;overflow: scroll;">
+    <div  id="page_model"  style="z-index: 99; display: none; position: absolute; height: 100vh; width: 100%;align-items: center; justify-content: center;">
+      <div   style=" padding: 20px; display: flex; flex-direction: column; width: 80%;height: 60%; background-color: #d1f1ff;border-radius:20px;border: 2px solid #9fb7c2;">
+        <div  style="height: 80%;overflow: scroll; display: flex; flex-direction: row;">
           {% for model in liste_models %}
-          <div onclick="load_model('{{model.run_id}}')" style="border:solid 3px #000000;"> <h3>{{model.run_name}}</h3> <p>{{model.run_id}} ,{{model.path}}</p> <code>{{model.metrics}}</code> </div>
+          <div onclick="load_model('{{model.run_id}}')" class="bulle_model" style="border:solid 3px #9fb7c2;"> <h3>{{model.run_name}}</h3> <p>{{model.run_id}} ,{{model.path}}</p> <code>{{model.metrics}}</code> </div>
           {% endfor %}
             
         </div>
         <div>
-          <p onclick="volet_code('close')" style="position:relative;right: 0px;top: 0px;">apliqué</p>
-          <p onclick="volet_code('close')" style="position:relative;right: 0px;top: 0px;">fermé</p>
+          <button onclick="volet_code('close')" >fermé</button>
         </div>
         
 
@@ -267,23 +344,22 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
     <div class="top_panel" id="ui_top_panel">
     </div> <!-- endof #top_panel -->
 
-    <button onclick="del_sel_regions()" >Delete<title>Delete Region</title></button>
+    
     <div  onclick="volet_code('open')">model : {{model}} : {{label_confirm}}</div>
 
    
     
-    <div style="display: flex;flex-direction: row;">
+    <div style="display: flex;flex-direction: row; justify-content: center;">
     {% for element in liste_images %}
    
     <a href="{{ url_for('labelling',pathname=filepath[0],dirname=filepath[1], filename=element,model=model) }}">
-      <img src=" {{ url_for('get_image_thumbnail',pathname=filepath[0],dirname=filepath[1], filename=element) }}"></img>
+      <img style="height: 140px; margin :5px;" src=" {{ url_for('get_image_thumbnail',pathname=filepath[0],dirname=filepath[1], filename=element) }}"></img>
       
     </a>
- 
     {% endfor %}
   </div>
-
-
+  filepath
+<button><a href="{{ url_for('overview') }}/{{filepath[1]}}">Projet</a></button>
 <button onclick="upload_all_region_data()">save</button>
 <button onclick="save_and_next()">save and next</button>
   {{index_in_list}}
@@ -301,7 +377,7 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
           <span class="text_button" onclick="leftsidebar_toggle()" title="Show/hide this toolbar panel">&ltrif;</span>
         </div>
 
-        <button style="display: none;" class="leftsidebar_accordion active">Region Shape</button> 
+        <button style="display: none;" class="leftsidebar_accordion active" >Region Shape</button> 
         <div style="display: none;" class="leftsidebar_accordion_panel show">
           <ul class="region_shape">
             <li id="region_shape_rect" class="selected" onclick="select_region_shape('rect')" title="Rectangle (Shortcut key 1)"><svg height="32" viewbox="0 0 32 32"><use xlink:href="#shape_rectangle"></use></svg></li>
@@ -348,7 +424,7 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
         </div>
 
         <!-- Attributes -->
-        <button class="leftsidebar_accordion active" id="attributes_editor_panel_title">Attributes</button>
+        <button class="leftsidebar_accordion active" id="attributes_editor_panel_title" style="color:black" >Attributes</button>
         <div class="leftsidebar_accordion_panel show" id="attributes_editor_panel">
           <div class="button_panel" style="display: none;">
             <span class="text_button" onclick="show_region_attributes_update_panel()" id="button_show_region_attributes" title="Show region attributes">Region Attributes</span>
@@ -370,9 +446,10 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
             </p>
           </div>
         </div>
+        <button onclick="del_sel_regions()" style="margin: 20px;" >Delete Select Region<title>Delete Region</title></button>
         <div id="annotation_editor_panel2" style="width: 100%;height: fit-content;"></div>
 
-        <button class="leftsidebar_accordion">Keyboard Shortcuts</button>
+        <button class="leftsidebar_accordion" style="display: none;">Keyboard Shortcuts</button>
         <div class="leftsidebar_accordion_panel">
           <div style="display:block; text-align:center; padding:1rem;">Available only on image focus</div>
           <table>
@@ -6104,12 +6181,8 @@ function show_attribute_options() {
     c1.setAttribute('style', 'width:60%');
     c1.setAttribute('title', 'URL or base64 (see https://www.base64-image.de/) encoded image data that corresponds to the image shown as an option to the annotator');
     c1.innerHTML = 'image url or b64';
-    var c2 = document.createElement('span');
-    c2.setAttribute('title', 'The default value of this attribute');
-    c2.innerHTML = 'def.';
     p.appendChild(c0);
     p.appendChild(c1);
-    p.appendChild(c2);
     document.getElementById('attribute_options').appendChild(p);
 
     var options = _via_attributes[_via_attribute_being_updated][attr_id].options;
@@ -6132,16 +6205,9 @@ function show_attribute_options() {
     c0.setAttribute('style', 'width:25%');
     c0.setAttribute('title', 'When selected, this is the value that appears in exported annotations');
     c0.innerHTML = 'id';
-    var c1 = document.createElement('span');
-    c1.setAttribute('style', 'width:60%');
-    c1.setAttribute('title', 'This is the text shown as an option to the annotator');
-    c1.innerHTML = 'description';
-    var c2 = document.createElement('span');
-    c2.setAttribute('title', 'The default value of this attribute');
-    c2.innerHTML = 'def.';
+
+    
     p.appendChild(c0);
-    p.appendChild(c1);
-    p.appendChild(c2);
     document.getElementById('attribute_options').appendChild(p);
 
     var options = _via_attributes[_via_attribute_being_updated][attr_id].options;
@@ -6172,9 +6238,9 @@ function attribute_property_add_input_property(title, name, value, id) {
     c1b.setAttribute('value', value);
   }
   c1b.setAttribute('id', id);
-  c1.appendChild(c1b);
+
   p.appendChild(c0);
-  p.appendChild(c1);
+
 
   document.getElementById('attribute_properties').appendChild(p);
 }
@@ -6205,27 +6271,9 @@ function attribute_property_add_option(attr_id, option_id, option_desc, option_d
   c1b.setAttribute('onchange', 'attribute_property_on_option_update(this)');
   c1b.setAttribute('id', '_via_attribute_option_description_' + option_id);
 
-  var c2 = document.createElement('span');
-  var c2b = document.createElement('input');
-  c2b.setAttribute('type', attribute_type);
-  if ( typeof option_default !== 'undefined' ) {
-    c2b.checked = option_default;
-  }
-  if ( attribute_type === 'radio' || attribute_type === 'image' || attribute_type === 'dropdown' ) {
-    // ensured that user can activate only one radio button
-    c2b.setAttribute('type', 'radio');
-    c2b.setAttribute('name', attr_id);
-  }
-
-  c2b.setAttribute('onchange', 'attribute_property_on_option_update(this)');
-  c2b.setAttribute('id', '_via_attribute_option_default_' + option_id);
-
+ 
   c0.appendChild(c0b);
-  c1.appendChild(c1b);
-  c2.appendChild(c2b);
   p.appendChild(c0);
-  p.appendChild(c1);
-  p.appendChild(c2);
 
   document.getElementById('attribute_options').appendChild(p);
 }
