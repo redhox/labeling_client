@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>labellingtool</title>
   </head>
-  <body style="margin: 0;">
-<div class="container">{% block content %}{% endblock %}</div>
+  <body style="margin: 0;" style="display: flex;">
+    {% include 'navtop.html'%}
+
+<div class="container" style="max-width: 1200px;     margin-left: auto;margin-right: auto;">{% block content %}{% endblock %}</div>
 </body>
