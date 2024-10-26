@@ -79,7 +79,7 @@ def check_authentication(func):
         if request.endpoint == 'predict_route':
             # Extract the token from the request's form
             token = request.form['token']
-            headers = {'Authorization': f'JWT {token}'}
+            headers = {'Authorization': f'Bearer {token}'}
             response = requests.post(f'{SERVER_URL}/users/protected_route', headers=headers)
             if response.status_code == 200:
                 # Do not print the result here
@@ -92,7 +92,7 @@ def check_authentication(func):
             token = session.get('token')
             if token:
                 # Verify the token using the get_token function
-                headers = {'Authorization': f'JWT {token}'}
+                headers = {'Authorization': f'Bearer {token}'}
                 response = requests.post(f'{SERVER_URL}/users/protected_route', headers=headers)
                 if response.status_code == 200:
                     # Do not print the result here
@@ -160,22 +160,27 @@ def login():
             session['last_login']=last_login
             return redirect(url_for('overview'))
         else:
-            return jsonify({'message':'auth fail'})
+            
+            errorsesion= "wrong"
+            print(errorsesion)
+            render_template('login.html',errorsesion=errorsesion)
     
     if session.get('token'):
         return redirect(url_for('overview'))
     print('pls')
-    return render_template('login.html') 
+    errorsesion= "wrong"
+    print(errorsesion)
+    return render_template('login.html')
 
 
 @app.route('/dashboard')
 @check_authentication
 def dashboard(): 
         
-
+ 
     last_login = session.get('last_login')
     token = session.get('token') 
-    headers = {'Authorization': f'JWT {token}'}
+    headers = {'Authorization': f'Bearer {token}'}
     user=get_current_user() 
     print("dashboard")
     print("dashboard",user) 
@@ -185,10 +190,10 @@ def dashboard():
 @check_authentication
 def user_management():
     token = session.get('token') 
-    headers = {'Authorization': f'JWT {token}'}
+    headers = {'Authorization': f'Bearer {token}'}
     user=get_current_user()
     
-    headers = {'Authorization': f'JWT {token}'} 
+    headers = {'Authorization': f'Bearer {token}'} 
     if user['is_admin'] == True:
         response = requests.post(f'{SERVER_URL}/users/get_all_users', headers=headers)   
         if response.status_code == 200:
@@ -209,10 +214,10 @@ def user_management():
 @check_authentication
 def register():
     token = session.get('token') 
-    headers = {'Authorization': f'JWT {token}'} 
+    headers = {'Authorization': f'Bearer {token}'} 
     print('register')
     username = request.form['username']
-    password = request.form['password']
+    password = request.form['password'] 
     email = request.form['email'] 
 
 
@@ -222,8 +227,9 @@ def register():
         "password": password
     }
     print('ici ça va',data ) 
+    print(f'requete secur {SERVER_URL}/users/',token)
     response = requests.post(f'{SERVER_URL}/users/',json=data , headers=headers)
-    print(response) 
+    print('responce de la route secur',response) 
     return user_management() 
  
  
@@ -241,7 +247,7 @@ def register():
 @check_authentication
 def switch_role(user_id):
     token = session.get('token') 
-    headers = {'Authorization': f'JWT {token}'} 
+    headers = {'Authorization': f'Bearer {token}'} 
 
     response = requests.post(
     f'{SERVER_URL}/users/ids', headers=headers , json={'user_id':user_id})
@@ -254,7 +260,7 @@ def switch_role(user_id):
     if user_data[3] == False:
         new_role = True
     print('new_role',new_role)
-    response = requests.post(
+    response = requests.put(
     f'{SERVER_URL}/users/switch_role', headers=headers , json={'user_id':user_id,'role_is_admin':new_role})
     response.raise_for_status()
 
@@ -263,11 +269,11 @@ def switch_role(user_id):
 @app.route('/delete_user/<int:user_id>',methods=['POST']) 
 @check_authentication
 def delete_user(user_id):
-    token = session.get('token') 
+    token = session.get('token')
+
     user=get_current_user() 
-    headers = {'Authorization': f'JWT {token}'} 
-    response = requests.post(
-    f'{SERVER_URL}/users/delete', headers=headers , json={'user_id':user_id})
+    headers = {'Authorization': f'Bearer {token}'} 
+    response = requests.delete(f'{SERVER_URL}/users/delete', headers=headers , json={'user_id':user_id})
     response.raise_for_status()
     if user['id']==user_id:
         return logout()
@@ -277,10 +283,14 @@ def delete_user(user_id):
 @app.route('/update')
 @check_authentication
 def update():
-    repo = Repo('.')
-    repo.remotes.origin.pull() 
-    return login()
-     
+    token = session.get('token')
+    if token:
+        repo = Repo('.')
+        repo.remotes.origin.pull() 
+        return login()
+    else:
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 
 
 @app.context_processor
@@ -300,11 +310,11 @@ def labelling(pathname,dirname,filename,model):
             files = {'file': img_file}
         
             data={'path': f'{filepath[1]}/{filepath[2]}'} 
-            
+            headers = {'Authorization': f'Bearer {token}'}
             #verification 
             response = requests.post(
                 f"{SERVER_URL}/images/image_search", 
-                data={"path": f'{UUID_MACHINE}/{filepath[1]}/{filepath[2]}'}, 
+                data={"path": f'{UUID_MACHINE}/{filepath[1]}/{filepath[2]}'},  headers=headers
                 )
             label_confirm=''
 
@@ -328,7 +338,7 @@ def labelling(pathname,dirname,filename,model):
                 response = requests.post( 
                     f"{SERVER_URL}/images/image_save",
                     data={"path": f'{UUID_MACHINE}/{filepath[1]}/{filepath[2]}',"model":model},
-                    files=files
+                    files=files, headers=headers
                     )
                 response_data = response.json()
                 regions = json.dumps(response_data)
@@ -365,7 +375,8 @@ def labelling(pathname,dirname,filename,model):
             nextimage=False
 
         index_in_list=[indice_element,len(liste_images)]
-        response = requests.post(f"{SERVER_URL}/models/actif_model")
+        headers = {'Authorization': f'Bearer {token}'}
+        response = requests.post(f"{SERVER_URL}/models/actif_model", headers=headers)
         response_data = response.json()
         data = json.loads(response_data) 
         # print('listemodel= ',data)
@@ -383,7 +394,7 @@ def resultat():
     token = session.get('token')
  
     if token:
-        headers = {'Authorization': f'JWT {token}'}
+        headers = {'Authorization': f'Bearer {token}'}
         file = request.files['file']
 
         if file:
@@ -401,57 +412,76 @@ def resultat():
             regions=data[first_key]["regions"]
             data = {'filename':filename,"filedir":filedir,"path":path,'regions': regions,"uuid_machine":UUID_MACHINE}
             print("resultat",data)
-            response = requests.post(f'{SERVER_URL}/images/post_resultat', json=data, headers=headers)
+            response = requests.put(f'{SERVER_URL}/images/post_resultat', json=data, headers=headers)
             return jsonify({"message": " File uploaded successfully"}), 200 
-
+    else:
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 @app.route('/get_image/<pathname>/<dirname>/<filename>' ,methods=['GET'])
 @check_authentication
 def get_image(pathname,dirname,filename):
     print("getimage")
-    image_path = f'/{pathname}/{dirname}/{filename}'
-    with Image.open(image_path) as img:
-        return send_file(image_path)
+    token = session.get('token')
+    if token:
+        image_path = f'/{pathname}/{dirname}/{filename}'
+        with Image.open(image_path) as img:
+            return send_file(image_path)
 
-    
+    else:
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 @app.route('/get_image_thumbnail/<pathname>/<dirname>/<filename>' ,methods=['GET'])
 @check_authentication
 def get_image_thumbnail(pathname,dirname,filename):
-    print("getimage")
-    image_path = f'/{pathname}/{dirname}/{filename}'
-    with Image.open(image_path) as img:
-        new_size = (170, 170)  # Exemple : 100px de large et 100px de haut
-        img.thumbnail(new_size)
-        buffered = io.BytesIO()
-        img.save(buffered, format="JPEG")
-        return send_file(io.BytesIO(buffered.getvalue()), mimetype='image/jpeg')
-    
+    token = session.get('token')
+    if token:
+        print("getimage")
+        image_path = f'/{pathname}/{dirname}/{filename}'
+        with Image.open(image_path) as img:
+            new_size = (170, 170)  # Exemple : 100px de large et 100px de haut
+            img.thumbnail(new_size)
+            buffered = io.BytesIO()
+            img.save(buffered, format="JPEG")
+            return send_file(io.BytesIO(buffered.getvalue()), mimetype='image/jpeg')
+    else:
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 @app.route('/overview')
 @check_authentication
 def overview():
-    user=get_current_user()
-    images = dir_in_dir('./dossier_images')
-    
-    return render_template('overview.html', images=images, user=user)
+    token = session.get('token')
+    if token:
+        user=get_current_user()
+        images = dir_in_dir('./dossier_images')
+        return render_template('overview.html', images=images, user=user)
+    else:
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 
 @app.route('/overview/<dirname>')
 @check_authentication
 def overview_dir(dirname):
-    user=get_current_user()
-    images = images_in_dir(f'/image_dir/{dirname}')
-    path=f'image_dir'
-    model='model_non_actif'
-    print("overvei dirname")
-    print({"uuid": UUID_MACHINE,"projet_name":dirname,"download":False})
-    
-    response = requests.post( 
-        f"{SERVER_URL}/images/labels",
-        json={"uuid": UUID_MACHINE,"projet_name":dirname,"download":False})
-    response_data = response.json()
-    print("reponce label data",response_data)
-    data_label = json.loads(response_data)
+    token = session.get('token')
+    if token:
+        user=get_current_user()
+        images = images_in_dir(f'/image_dir/{dirname}')
+        path=f'image_dir'
+        model='model_non_actif'
+        print("overvei dirname")
+        print({"uuid": UUID_MACHINE,"projet_name":dirname,"download":False})
+        
+        headers = {'Authorization': f'Bearer {token}'}
+        response = requests.post( 
+            f"{SERVER_URL}/images/labels",
+            json={"uuid": UUID_MACHINE,"projet_name":dirname,"download":False}, headers=headers)
+        response_data = response.json()
+        print("reponce label data",response_data)
+        data_label = json.loads(response_data)
 
-    return render_template('overview_img.html', images=images,path=path,dirname=dirname, user=user,model=model,data_label=data_label)
-
+        return render_template('overview_img.html', images=images,path=path,dirname=dirname, user=user,model=model,data_label=data_label)
+    else:
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 
 
 def create_zip_from_list(text_list,projet_name):
@@ -489,79 +519,106 @@ def create_zip_from_list(text_list,projet_name):
 @app.route('/download_label/<projet_name>')
 @check_authentication
 def download_label(projet_name):
-    # S'assurer que le dossier existe
-    if not os.path.exists(f'{TEMP_FOLDER}/{projet_name}'):
-        os.makedirs(f'{TEMP_FOLDER}/{projet_name}')
-    
-    
-    response = requests.post( 
-        f"{SERVER_URL}/images/labels",
-        json={"uuid": UUID_MACHINE,"projet_name":projet_name,"download":True})
-    response_data = response.json()
-    data = json.loads(response_data)
-    print('data:',data)
-   # Créer un fichier zip depuis la liste de textes
-    memory_file = create_zip_from_list(data,projet_name)
-    # if os.path.exists(f'{TEMP_FOLDER}/{projet_name}'):
-    #     os.remove(f'{TEMP_FOLDER}/{projet_name}')
-    # Envoyer le fichier zip pour le téléchargement
-    if memory_file:
-        return send_file(memory_file, download_name=f'{projet_name}.zip', as_attachment=True)
+    token = session.get('token')
+    if token:
+        headers = {'Authorization': f'Bearer {token}'}
+        # S'assurer que le dossier existe
+        if not os.path.exists(f'{TEMP_FOLDER}/{projet_name}'):
+            os.makedirs(f'{TEMP_FOLDER}/{projet_name}')
+        
+        
+        response = requests.post( 
+            f"{SERVER_URL}/images/labels",
+            json={"uuid": UUID_MACHINE,"projet_name":projet_name,"download":True}, headers=headers)
+        response_data = response.json()
+        data = json.loads(response_data)
+        print('data:',data)
+    # Créer un fichier zip depuis la liste de textes
+        memory_file = create_zip_from_list(data,projet_name)
+        # if os.path.exists(f'{TEMP_FOLDER}/{projet_name}'):
+        #     os.remove(f'{TEMP_FOLDER}/{projet_name}')
+        # Envoyer le fichier zip pour le téléchargement
+        if memory_file:
+            return send_file(memory_file, download_name=f'{projet_name}.zip', as_attachment=True)
+        else:
+            return "Erreur lors de la création du fichier zip.", 500
     else:
-        return "Erreur lors de la création du fichier zip.", 500
-
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 
 @app.route('/model_list')
 @check_authentication
 def model_list():
-    user=get_current_user()
-    if user['is_admin'] != True:
-        return dashboard() 
-    response = requests.post(f'{SERVER_URL}/models/lists_models')
-    response_data = response.json()
-    list_model_all = json.loads(response_data)
-    print('model data',list_model_all)
+    token = session.get('token')
+    if token:
+        user=get_current_user()
+        if user['is_admin'] != True:
+            return dashboard() 
 
-    response = requests.post(f'{SERVER_URL}/models/actif_model')
-    response_data = response.json()
-    list_model_actif = json.loads(response_data)
-    # list_model_actif = json.dumps(response_data)
+        headers = {'Authorization': f'Bearer {token}'}
+        response = requests.post(f'{SERVER_URL}/models/lists_models', headers=headers)
+        response_data = response.json()
+        list_model_all = json.loads(response_data)
+        print('model data',list_model_all)
 
-    return render_template('model_dashboard.html', list_model_actif=list_model_actif,list_model_all=list_model_all,user=user)
+        response = requests.post(f'{SERVER_URL}/models/actif_model', headers=headers)
+        response_data = response.json()
+        list_model_actif = json.loads(response_data)
+        # list_model_actif = json.dumps(response_data)
 
+        return render_template('model_dashboard.html', list_model_actif=list_model_actif,list_model_all=list_model_all,user=user)
+    else:
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 @app.route('/add_model_list/<string:id_model>', methods=['GET'])
 @check_authentication
 def add_model_list(id_model):
     print('id model',id_model)
-    response = requests.post(f'{SERVER_URL}/models/add_model_id', json={'id':id_model})
-    response_data = response.json()
-    return json.dumps({"message": "Bonjour"})
+    token = session.get('token')
+    if token:
+        headers = {'Authorization': f'Bearer {token}'}
+        response = requests.put(f'{SERVER_URL}/models/add_model_id', json={'id':id_model}, headers=headers)
+        response_data = response.json()
+        return json.dumps({"message": "Bonjour"})
+    else:
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 
 @app.route('/del_model_list/<string:id_model>', methods=['GET'])
 @check_authentication
 def del_model_list(id_model):
     print('id model',id_model)
-    response = requests.post(f'{SERVER_URL}/models/del_model_id', json={'id':id_model})
-    response_data = response.json()
-    print('response_data del model',response_data)
-    return json.dumps({"message": "Bonjour"})
-
+    token = session.get('token')
+    if token:
+        headers = {'Authorization': f'Bearer {token}'}
+        response = requests.delete(f'{SERVER_URL}/models/del_model_id', json={'id':id_model}, headers=headers)
+        response_data = response.json()
+        print('response_data del model',response_data)
+        return json.dumps({"message": "Bonjour"})
+    else:
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 @app.route('/liste_actif_model') 
 @check_authentication
 def liste_actif_model():
-    response = requests.post(f'{SERVER_URL}/models/actif_model')
-    response_data = response.json()
-    list_model_actif = json.loads(response_data)
-    print('liste model',list_model_actif)
-    return list_model_actif 
-
+    token = session.get('token')
+    if token:
+        headers = {'Authorization': f'Bearer {token}'}
+        response = requests.post(f'{SERVER_URL}/models/actif_model', headers=headers)
+        response_data = response.json()
+        list_model_actif = json.loads(response_data)
+        print('liste model',list_model_actif)
+        return list_model_actif 
+    else:
+        print("Authentication failed")
+        return jsonify({'message': 'Authentication failed'}), 401
 
 
 
 @app.route('/logout')
 def logout():
     session.clear()
-    return login()
+    return render_template('login.html',errorsesion="timeout")
 
 
 

@@ -306,7 +306,7 @@ main {
   <body onload="_via_init()" onresize="_via_update_ui_components()">
     
     
-    <div  id="page_model"  style="z-index: 99; display: none; position: absolute; height: 100vh; width: 100%;align-items: center; justify-content: center;">
+    <div  id="page_model"  style="z-index: 99; display: none; position: absolute; height: 100vh; width: 80vw;align-items: center; justify-content: center;">
       <div   style=" padding: 20px; display: flex; flex-direction: column; width: 80%;height: 60%; background-color: #d1f1ff;border-radius:20px;border: 2px solid #9fb7c2;">
         <div  style="height: 80%;overflow: scroll; display: flex; flex-direction: row;">
           {% for model in liste_models %}
@@ -345,7 +345,7 @@ main {
     </div> <!-- endof #top_panel -->
 
     
-    <div  onclick="volet_code('open')">model : {{model}} : {{label_confirm}}</div>
+    
 
    
     
@@ -358,19 +358,21 @@ main {
     </a>
     {% endfor %}
   </div>
-  filepath
-<button><a href="{{ url_for('overview') }}/{{filepath[1]}}">Projet</a></button>
+<button><a href="{{ url_for('overview') }}/{{filepath[1]}}" style="color: white;">Projet</a></button>
 <button onclick="upload_all_region_data()">save</button>
 <button onclick="save_and_next()">save and next</button>
+
   {{index_in_list}}
     <!-- Middle Panel contains a left-sidebar and image display areas -->
-    <div class="middle_panel">
+    <div style="margin-top: 10px;" class="middle_panel">
       <!-- this panel contains a button to shows the left side bar -->
       <div id="leftsidebar_collapse_panel">
+        
         <span class="text_button" onclick="leftsidebar_toggle()" title="Show left sidebar">&rtrif;</span>
       </div>
 
       <div id="leftsidebar">
+        <div  onclick="volet_code('open')">model : <button> {{model}} : {{label_confirm}}</button></div>
         <div class="leftsidebar_accordion_panel show" style="float:right; border:2px solid #f2f2f2;">
           <span class="text_button" onclick="leftsidebar_decrease_width()" title="Reduce width of this toolbar panel">&larr;</span>
           <span class="text_button" onclick="leftsidebar_increase_width()" title="Increase width of this toolbar panel">&rarr;</span>
@@ -442,7 +444,6 @@ main {
             <div style="display: none;" id="attribute_properties"></div>
             <div id="attribute_options"></div>
             <p style="text-align:center">
-              <span class="text_button" title="Show a spreadsheet like editor for all manual annotations" onclick="annotation_editor_toggle_all_regions_editor()">Toggle Annotation Editor</span>
             </p>
           </div>
         </div>
