@@ -316,11 +316,15 @@ def labelling(pathname,dirname,filename,model):
                 f"{SERVER_URL}/images/image_search", 
                 data={"path": f'{UUID_MACHINE}/{filepath[1]}/{filepath[2]}'},  headers=headers
                 )
-            label_confirm=''
+            label_confirm='' 
 
             if response.status_code == 200:
-                response_data = response.json()
-                data = json.loads(response_data)
+                data = response.json()
+                # print('ici',response_json )  
+                # data = response_json['content'] 
+
+
+
                 print('data status 200=',data)
                 try:
                     regions = data['regions'] 
@@ -491,7 +495,8 @@ def create_zip_from_list(text_list,projet_name):
     with zipfile.ZipFile(memory_file, 'w') as zf:
         for element in text_list:
             # Créer le nom du fichier, par exemple "file_1.txt"
-            filename = f"{element['filename']}.txt"
+            filename = '.'.join(element['filename'].split('.')[:-1])
+            filename = f"{filename}.txt"
             
             # Chemin complet du fichier
             file_path = f'{TEMP_FOLDER}/{projet_name}/{filename}'

@@ -110,7 +110,6 @@
 </head>
 
 <body>
-  {{errorsesion}}
   <div class="container">
     <span class="error animated tada" id="msg"></span>
     <form name="form1" class="box" action="/" method="post" onsubmit="return checkStuff()"> 
@@ -121,7 +120,6 @@
       <input type="submit" value="Sign in" />
     </form>
     <span style="display: none;" id="bad_auth"> wrong credancial </span>
-    <span style="display: none;" id="timeout"> timeout</span>
   </div>
 
   <script>
@@ -152,11 +150,6 @@
     window.onload = function () {
       document.getElementById('bad_auth').style.display = 'block';
     }
-    {% endif %}
-    {% if  errorsesion == "timeout" %}
-    window.onload = function () {
-      document.getElementById('timeout').style.display = 'block';
-    } 
     {% endif %}
   </script>
 </body>
