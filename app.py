@@ -121,11 +121,10 @@ def dir_in_dir(path):
 
 
 def images_in_dir(path):
-    # Spécifiez le chemin du dossier à scanner
-    image_list=[]
-    for racine, soudoss, fichiers in sorted(os.walk(path)):
+    image_list = []
+    for racine, _, fichiers in sorted(os.walk(path)):
         for fichier in fichiers:
-            if fichier != "integrity.check" or "metadata.json":
+            if fichier not in ["integrity.check", "metadata.json"]:
                 image_list.append(fichier)
     return image_list
 
@@ -138,6 +137,39 @@ def need_update():
         return False
     else:
         return True
+
+def create_zip_from_list(text_list, project_name):
+    # Utiliser un fichier en mémoire pour stocker le zip
+    memory_file = io.BytesIO()
+
+    # Chemin du projet
+    project_path = os.path.join(TEMP_FOLDER, project_name)
+    os.makedirs(project_path, exist_ok=True)  # Créer le dossier si nécessaire
+
+    # Créer le fichier zip
+    with zipfile.ZipFile(memory_file, 'w') as zf:
+        for element in text_list:
+            # Créer le nom du fichier, par exemple "file_1.txt"
+            filename = '.'.join(element['filename'].split('.')[:-1])
+            filename = f"{filename}.txt"
+            
+            # Chemin complet du fichier
+            file_path = f'{TEMP_FOLDER}/{project_name}/{filename}'
+            # Créer un fichier txt pour chaque ligne
+            with open(file_path, 'a') as f:
+                f.write('#objet x y width height \n')
+            for region in element['regions']:
+
+                result_string = f"{region['region_attributes']['objet'],region['shape_attributes']['x'],region['shape_attributes']['y'],region['shape_attributes']['width'],region['shape_attributes']['height']}"
+                with open(file_path, 'a') as f:
+                    f.write(f'{result_string}\n')
+            
+            # Ajouter chaque fichier dans le zip
+            zf.write(file_path, filename)
+            os.remove(f'{file_path}')
+
+    memory_file.seek(0)  # Rewind the file pointer to the beginning
+    return memory_file
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -488,36 +520,6 @@ def overview_dir(dirname):
         return jsonify({'message': 'Authentication failed'}), 401
 
 
-def create_zip_from_list(text_list,projet_name):
-    # Utiliser un fichier en mémoire pour stocker le zip
-    memory_file = io.BytesIO()
-    
-    with zipfile.ZipFile(memory_file, 'w') as zf:
-        for element in text_list:
-            # Créer le nom du fichier, par exemple "file_1.txt"
-            filename = '.'.join(element['filename'].split('.')[:-1])
-            filename = f"{filename}.txt"
-            
-            # Chemin complet du fichier
-            file_path = f'{TEMP_FOLDER}/{projet_name}/{filename}'
-            # Créer un fichier txt pour chaque ligne
-            with open(file_path, 'a') as f:
-                f.write('#objet x y width height \n')
-            for region in element['regions']:
-
-                result_string = f"{region['region_attributes']['objet'],region['shape_attributes']['x'],region['shape_attributes']['y'],region['shape_attributes']['width'],region['shape_attributes']['height']}"
-                with open(file_path, 'a') as f:
-                    f.write(f'{result_string}\n')
-            
-            # Ajouter chaque fichier dans le zip
-            zf.write(file_path, filename)
-            os.remove(f'{file_path}')
-
-            
-
-    # Revenir au début du fichier en mémoire
-    memory_file.seek(0)
-    return memory_file
 
 
 
