@@ -12,7 +12,7 @@
 
     .colonne {
         display: flex;
-        flex-direction: column;
+        flex-wrap: wrap;
         padding: 20px;
         overflow-y: auto;
 
@@ -76,7 +76,10 @@
         height: 100px;
     margin-bottom: 15px;
     }
-    
+    #model-data{
+        display: flex;
+        flex-wrap: wrap;
+    }
 </style>
 
 
@@ -84,12 +87,14 @@
 
 
 <main >
+    <h2>list actif</h2>
 <div class="colonne">
-<h2>list actif</h2>
+
 <div id="model-data"></div>
 </div>
+<h2>All List</h2>
 <div class="colonne">
-    <h2>All List</h2>
+
 {% for model in list_model_all %}
 
 <div  class="bulle_model">
